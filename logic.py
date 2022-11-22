@@ -51,7 +51,7 @@ def process_data(matches: Iterable, include_started_matches: bool = True) -> Gen
 		yield {
 			"match_name": match_name,
 			"match_start_time": start_time,
-			"time_to_start": time_to_start,
+			"hours_to_start": time_to_start,
 			"league": league,
 			"best_outcome_odds": best_odd_per_outcome,
 			"total_implied_odds": total_implied_odds,
