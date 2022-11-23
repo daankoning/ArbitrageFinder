@@ -3,7 +3,10 @@ import os
 from itertools import chain
 import argparse
 from dotenv import load_dotenv
-from rich import print
+try:
+	from rich import print
+except ImportError:
+	pass
 
 
 def main():
