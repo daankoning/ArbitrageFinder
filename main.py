@@ -1,12 +1,9 @@
 from logic import *
-import os
+import os, sys
 from itertools import chain
 import argparse
 from dotenv import load_dotenv
-try:
-	from rich import print
-except ImportError:
-	pass
+from rich import print
 
 
 def main():
@@ -30,20 +27,36 @@ def main():
 		default="eu",
 		help="The region in which to look for arbitrage opportunities."
 	)
+	parser.add_argument(
+		"-u", "--unformatted",
+		action="store_true",
+		help="If set, turn output into the json dump from the opportunities."
+	)
 	args = parser.parse_args()
 
 	key = args.key
 	region = args.region
+	print_unformatted = args.unformatted
 
 	# logic
 	sports = get_sports(key)
 	data = chain.from_iterable(get_data(key, sport, region=region) for sport in sports)
 	data = filter(lambda x: x != "message", data)
 	results = process_data(data)
-
 	arbitrage_opportunities = filter(lambda x: x["total_implied_odds"] < 1, results)
-	for i in arbitrage_opportunities:
-		print(i)
+
+	if print_unformatted:
+		for arb in arbitrage_opportunities:
+			print(arb)
+	else:
+		arbitrage_opportunities = list(arbitrage_opportunities)
+		print(f"{len(arbitrage_opportunities)} arbitrage opportunities found {':money-mouth_face:' if len(arbitrage_opportunities) > 0 else ':man_shrugging:'}")
+
+		for arb in arbitrage_opportunities:
+			print(f"\t[italic]{arb['match_name']} in {arb['league']} [/italic]")
+			print(f"\t\tTotal implied odds: {arb['total_implied_odds']} with these odds:")
+			for key, value in arb['best_outcome_odds'].items():
+				print(f"\t\t[bold red]{key}[/bold red] with [green]{value[0]}[/green] for {value[1]}")
 
 
 if __name__ == '__main__':

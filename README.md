@@ -17,13 +17,16 @@ Next, ensure you have an API key from The Odds API and simply run:
     python main.py --key <YOUR_API_KEY>
 
 ## Usage
-The tool offers three optional command line arguments.
+The tool offers four optional command line arguments.
 
 ### API key
 In order to set the API key to use either the `-k` or `--key` arguments. If neither of these are used the script will read the value of `$API_KEY`. `.env` files are also supported and automatically loaded.
 
 ### Region
 Different parts of the world have different bookmakers. To reflect this the `-r` or `--region` arguments allow you to set the region in which to search. Accepts the values `"eu"`,`"us"`, `"uk"`, and `"au"`. 
+
+### Unformatted
+Using the `-u` or `--unformatted` will remove the pretty printing and simply dump the json which contains the arbs to the console directly. Use this if you intend to extend upon the script in some way, for regular usage the formatted print is significantly better.
 
 ### Help
 The `-h` or `--help` flags will show a short help message with documentation.
