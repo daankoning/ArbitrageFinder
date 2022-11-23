@@ -26,7 +26,7 @@ In order to set the API key to use either the `-k` or `--key` arguments. If neit
 Different parts of the world have different bookmakers. To reflect this the `-r` or `--region` arguments allow you to set the region in which to search. Accepts the values `"eu"`,`"us"`, `"uk"`, and `"au"`. 
 
 ### Unformatted
-Using the `-u` or `--unformatted` will remove the pretty printing and simply dump the json which contains the arbs to the console directly. Use this if you intend to extend upon the script in some way, for regular usage the formatted print is significantly better.
+Using the `-u` or `--unformatted` flags will remove the pretty printing and simply dump the json which contains the arbs to the console directly. Use this if you intend to extend upon the script in some way, for regular usage the formatted print is significantly better.
 
 ### Help
 The `-h` or `--help` flags will show a short help message with documentation.
