@@ -1,5 +1,9 @@
+"""A simple tool to find sports betting arbitrage opportunities.
+
+The tool fetches the odds from The Odds API (https://the-odds-api.com/) and compares the odds at different
+bookmakers to each other in order to determine whether there are profitable and risk-free bets available."""
 from logic import *
-import os, sys
+import os
 from itertools import chain
 import argparse
 from dotenv import load_dotenv
@@ -11,10 +15,7 @@ def main():
 
 	parser = argparse.ArgumentParser(
 		prog="Arbitrage Finder",
-		description="""A simple tool to find sports betting arbitrage opportunities.
-		
-		The tool fetches the odds from The Odds API (https://the-odds-api.com/) and compares the odds at different
-		bookmakers to each other in order to determine whether there are profitable and risk-free bets available."""
+		description=__doc__
 	)
 	parser.add_argument(
 		"-k", "--key",
