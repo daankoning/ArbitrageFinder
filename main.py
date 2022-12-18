@@ -33,18 +33,25 @@ def main():
 		action="store_true",
 		help="If set, turn output into the json dump from the opportunities."
 	)
+	parser.add_argument(
+        "-c", "--cutoff",
+		type=float,
+		default=0,
+		help="The minimum profit margin required for an arb to be displayed. Inputted as a percentage."
+    )
 	args = parser.parse_args()
 
 	key = args.key
 	region = args.region
 	print_unformatted = args.unformatted
+	cutoff = args.cutoff/100
 
 	# logic
 	sports = get_sports(key)
 	data = chain.from_iterable(get_data(key, sport, region=region) for sport in sports)
 	data = filter(lambda x: x != "message", data)
 	results = process_data(data)
-	arbitrage_opportunities = filter(lambda x: x["total_implied_odds"] < 1, results)
+	arbitrage_opportunities = filter(lambda x: x["total_implied_odds"] < 1-cutoff, results)
 
 	if print_unformatted:
 		for arb in arbitrage_opportunities:
