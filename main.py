@@ -54,7 +54,7 @@ def main():
     arbitrage_opportunities = filter(lambda x: x["total_implied_odds"] < 1-cutoff, results)
 
     if print_unformatted:
-        print(arbitrage_opportunities)
+        print(list(arbitrage_opportunities))
     else:
         arbitrage_opportunities = list(arbitrage_opportunities)
         print(f"{len(arbitrage_opportunities)} arbitrage opportunities found {':money-mouth_face:' if len(arbitrage_opportunities) > 0 else ':man_shrugging:'}")
