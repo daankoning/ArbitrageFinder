@@ -2,7 +2,8 @@ from typing import Iterable, Generator
 import time
 import requests
 
-BASE_URL = "https://api.the-odds-api.com/v4"
+BASE_URL = "api.the-odds-api.com/v4"
+PROTOCOL = "https://"
 
 
 class APIException(RuntimeError):
@@ -28,17 +29,19 @@ def handle_faulty_response(response: requests.Response):
 
 def get_sports(key: str) -> set[str]:
     url = f"{BASE_URL}/sports/"
+    escaped_url = PROTOCOL + requests.utils.quote(url)
     querystring = {"apiKey": key}
 
-    response = requests.get(url, params=querystring)
+    response = requests.get(escaped_url, params=querystring)
     if not response:
         handle_faulty_response(response)
 
-    return {item["group"] for item in response.json()}
+    return {item["key"] for item in response.json()}
 
 
 def get_data(key: str, sport: str, region: str = "eu"):
     url = f"{BASE_URL}/sports/{sport}/odds/"
+    escaped_url = PROTOCOL + requests.utils.quote(url)
     querystring = {
         "apiKey": key,
         "regions": region,
@@ -46,7 +49,7 @@ def get_data(key: str, sport: str, region: str = "eu"):
         "dateFormat": "unix"
     }
 
-    response = requests.get(url, params=querystring)
+    response = requests.get(escaped_url, params=querystring)
     if not response:
         handle_faulty_response(response)
 
