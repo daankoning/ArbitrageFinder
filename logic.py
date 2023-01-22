@@ -5,11 +5,15 @@ import requests
 BASE_URL = "https://api.the-odds-api.com/v4"
 
 
-class AuthenticationException(RuntimeError):
+class APIException(RuntimeError):
     pass
 
 
-class RateLimitException(RuntimeError):
+class AuthenticationException(APIException):
+    pass
+
+
+class RateLimitException(APIException):
     pass
 
 
@@ -18,6 +22,8 @@ def handle_faulty_response(response: requests.Response):
         raise AuthenticationException("Failed to authenticate with the API. is the API key valid?")
     elif response.status_code == 429:
         raise RateLimitException("Encountered API rate limit.")
+    else:
+        raise APIException("Unknown issue arose while trying to access the API.")
 
 
 def get_sports(key: str) -> set[str]:
