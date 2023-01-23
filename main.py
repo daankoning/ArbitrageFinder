@@ -51,7 +51,7 @@ def main():
     data = chain.from_iterable(get_data(key, sport, region=region) for sport in sports)
     data = filter(lambda x: x != "message", data)
     results = process_data(data)
-    arbitrage_opportunities = filter(lambda x: x["total_implied_odds"] < 1-cutoff, results)
+    arbitrage_opportunities = filter(lambda x: 0 < x["total_implied_odds"] < 1-cutoff, results)
 
     if print_unformatted:
         print(list(arbitrage_opportunities))

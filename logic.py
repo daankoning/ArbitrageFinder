@@ -2,6 +2,11 @@ from typing import Iterable, Generator
 import time
 import requests
 
+try:
+    from tqdm import tqdm
+except ImportError:
+    tqdm = lambda *args, **kwargs: args[0]
+
 BASE_URL = "api.the-odds-api.com/v4"
 PROTOCOL = "https://"
 
@@ -59,6 +64,7 @@ def get_data(key: str, sport: str, region: str = "eu"):
 def process_data(matches: Iterable, include_started_matches: bool = True) -> Generator[dict, None, None]:
     """Extracts all matches that are available and calculates some things about them, such as the time to start and
     the best available implied odds."""
+    matches = tqdm(matches, desc="Checking all matches", leave=False, unit=" matches")
     for match in matches:
         start_time = int(match["commence_time"])
         if not include_started_matches and start_time < time.time():
