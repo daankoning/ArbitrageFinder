@@ -2,9 +2,8 @@
 
 The tool fetches the odds from The Odds API (https://the-odds-api.com/) and compares the odds at different
 bookmakers to each other in order to determine whether there are profitable and risk-free bets available."""
-from logic import *
+from logic import get_arbitrage_opportunities
 import os
-from itertools import chain
 import argparse
 from dotenv import load_dotenv
 from rich import print
@@ -46,12 +45,7 @@ def main():
     print_unformatted = args.unformatted
     cutoff = args.cutoff/100
 
-    # logic
-    sports = get_sports(key)
-    data = chain.from_iterable(get_data(key, sport, region=region) for sport in sports)
-    data = filter(lambda x: x != "message", data)
-    results = process_data(data)
-    arbitrage_opportunities = filter(lambda x: 0 < x["total_implied_odds"] < 1-cutoff, results)
+    arbitrage_opportunities = get_arbitrage_opportunities(key, region, cutoff)
 
     if print_unformatted:
         print(list(arbitrage_opportunities))
