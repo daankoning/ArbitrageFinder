@@ -13,7 +13,13 @@ PROTOCOL = "https://"
 
 
 class APIException(RuntimeError):
-    pass
+    def __int__(self, message, response: requests.Response):
+        self.api_message = response.json()['message']
+
+        super().__init__(message)
+
+    def __str__(self):
+        return f"('{self.args[0]}', '{self.args[1].json()['message']}')"
 
 
 class AuthenticationException(APIException):
@@ -26,11 +32,11 @@ class RateLimitException(APIException):
 
 def handle_faulty_response(response: requests.Response):
     if response.status_code == 401:
-        raise AuthenticationException("Failed to authenticate with the API. is the API key valid?")
+        raise AuthenticationException("Failed to authenticate with the API. is the API key valid?", response)
     elif response.status_code == 429:
-        raise RateLimitException("Encountered API rate limit.")
+        raise RateLimitException("Encountered API rate limit.", response)
     else:
-        raise APIException("Unknown issue arose while trying to access the API.")
+        raise APIException("Unknown issue arose while trying to access the API.", response)
 
 
 def get_sports(key: str) -> set[str]:
