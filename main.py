@@ -40,14 +40,11 @@ def main():
     )
     args = parser.parse_args()
 
-    key = args.key
-    region = args.region
-    print_unformatted = args.unformatted
     cutoff = args.cutoff/100
 
-    arbitrage_opportunities = get_arbitrage_opportunities(key, region, cutoff)
+    arbitrage_opportunities = get_arbitrage_opportunities(key=args.key, region=args.region, cutoff=cutoff)
 
-    if print_unformatted:
+    if args.unformatted:
         print(list(arbitrage_opportunities))
     else:
         arbitrage_opportunities = list(arbitrage_opportunities)
