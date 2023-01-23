@@ -2,7 +2,7 @@
 
 The tool fetches the odds from The Odds API (https://the-odds-api.com/) and compares the odds at different
 bookmakers to each other in order to determine whether there are profitable and risk-free bets available."""
-from logic import get_arbitrage_opportunities
+from src.logic import get_arbitrage_opportunities
 import os
 import argparse
 from dotenv import load_dotenv
