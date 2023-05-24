@@ -13,11 +13,6 @@ PROTOCOL = "https://"
 
 
 class APIException(RuntimeError):
-    def __int__(self, message, response: requests.Response):
-        self.api_message = response.json()['message']
-
-        super().__init__(message)
-
     def __str__(self):
         return f"('{self.args[0]}', '{self.args[1].json()['message']}')"
 
