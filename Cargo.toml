@@ -1,5 +1,5 @@
 [package]
-name = "arbitrageFinder"
+name = "arbitrage_finder"
 version = "0.1.0"
 edition = "2021"
 

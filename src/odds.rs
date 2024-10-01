@@ -5,24 +5,49 @@ use crate::sports::Sport;
 type UnixTime = u64;
 
 #[derive(Debug, Deserialize)]
-struct Outcome {
+pub struct Outcome {
     name: String,
     price: f64,
 }
 
+impl Outcome {
+    pub fn name(&self) -> &String {
+        &self.name
+    }
+    pub fn price(&self) -> f64 {
+        self.price
+    }
+}
+
 #[derive(Debug, Deserialize)]
-struct Market {
+pub struct Market {
     key: String,
     outcomes: Vec<Outcome>,
 }
 
+impl Market {
+    pub fn outcomes(&self) -> &Vec<Outcome> {
+        &self.outcomes
+    }
+}
+
 #[derive(Debug, Deserialize)]
-struct Bookmaker {
+pub struct Bookmaker {
     key: String,
     title: String,
     last_update: UnixTime,
     markets: Vec<Market>,
 }
+
+impl Bookmaker {
+    pub fn key(&self) -> &String {
+        &self.key
+    }
+    pub fn markets(&self) -> &Vec<Market> {
+        &self.markets
+    }
+}
+
 
 #[derive(Debug, Deserialize)]
 pub struct Match {
@@ -32,6 +57,15 @@ pub struct Match {
     home_team: String,
     away_team: String,
     bookmakers: Vec<Bookmaker>,
+}
+
+impl Match {
+    pub fn commence_time(&self) -> &UnixTime {
+        &self.commence_time
+    }
+    pub fn bookmakers(&self) -> &Vec<Bookmaker> {
+        &self.bookmakers
+    }
 }
 
 pub async fn get(sport: Sport, client: &OddsClient) -> Result<Vec<Match>, &str> {

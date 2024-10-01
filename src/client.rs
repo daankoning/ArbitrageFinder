@@ -12,13 +12,15 @@ impl Endpoint {
     fn to_url(&self) -> String {
         // TODO: this should use Reqwest::URL
         let suffix = match self {
-            Self::Sports => { "sports".to_string() }
+            Self::Sports =>  "sports".to_string(),
             Self::Odds(sport) => format!("sports/{}/odds", sport.key()),
         };
         format!("{BASE_URL}{suffix}")
     }
 }
 
+/// Wraps an instance of `reqwest::Client` to enable connecting with
+/// the Odds API.
 pub struct OddsClient {
     client: Client,
     api_key: String,
