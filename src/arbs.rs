@@ -1,7 +1,9 @@
 use crate::{odds, sports};
 use crate::client::OddsClient;
 use std::collections::HashMap;
+use std::fmt::Display;
 use futures::future::join_all;
+use colored::Colorize;
 
 // struct TODONAME {
 //     bookmaker: odds::Bookmaker,
@@ -42,6 +44,28 @@ impl GameCalculatedResults {
     }
 }
 
+impl Display for GameCalculatedResults {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f, "\t{} v {} in {}\n",
+            self.game.home_team().italic().blue(),
+            self.game.away_team().italic().red(),
+            self.game.sport_key().italic(),
+        )?;
+        write!(f, "\tWith total implied odds {}", self.total_implied_odds().to_string())?;
+
+        // TODO: this could be cleaner
+        for outcome in self.outcomes.iter() {
+            write!(f, "\n\t\t{} for {} at {}",
+                   outcome.0.bold(),
+                   1f64 / outcome.1.implied_odd,
+                   outcome.1.bookmaker_name,
+            )?;
+        }
+        write!(f, "")
+    }
+}
+
 pub fn best_implied_odds(game: odds::Match) -> GameCalculatedResults {
     // let x = game.bookmakers()
     //     .into_iter()
@@ -73,7 +97,7 @@ pub fn best_implied_odds(game: odds::Match) -> GameCalculatedResults {
                                 current_odd,
                             );
                         }
-                    },
+                    }
                     None => {
                         best_odds_per_outcome.insert(
                             outcome.name().to_owned(),
@@ -85,20 +109,20 @@ pub fn best_implied_odds(game: odds::Match) -> GameCalculatedResults {
         }
     }
 
-    GameCalculatedResults {game, outcomes: best_odds_per_outcome }
+    GameCalculatedResults { game, outcomes: best_odds_per_outcome }
 }
 
 fn print_type_of<T>(_: &T) {
     println!("{}", std::any::type_name::<T>());
 }
 
-pub async fn arbitrage(client: &OddsClient) -> f64 {
-    let sports = sports::get(&client).await.unwrap();
-    // sports.truncate(3);
-
-    let odds = join_all(sports
-        .into_iter()
-        .map(|sp| async { odds::get(sp, &client).await } ))
+pub async fn arbitrage(client: &OddsClient) -> Vec<GameCalculatedResults> {
+    join_all(
+        sports::get(&client)
+            .await
+            .unwrap()
+            .into_iter()
+            .map(|sp| async { odds::get(sp, &client).await }))
         .await
         .into_iter()
         .flat_map(|sport| match sport {
@@ -106,12 +130,6 @@ pub async fn arbitrage(client: &OddsClient) -> f64 {
             Err(_) => vec![].into_iter(),
         })
         .map(best_implied_odds)
-        .filter(|x| 0f64 < x.total_implied_odds() && x.total_implied_odds() < 1f64 );
-
-
-    for od in odds {
-        println!("{:#?}", od);
-    }
-
-    7f64
+        .filter(|x| 0f64 < x.total_implied_odds() && x.total_implied_odds() < 1.01f64)
+        .collect()
 }

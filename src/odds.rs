@@ -60,9 +60,22 @@ pub struct Match {
 }
 
 impl Match {
+    pub fn sport_key(&self) -> &String {
+        &self.sport_key
+    }
+
     pub fn commence_time(&self) -> &UnixTime {
         &self.commence_time
     }
+
+    pub fn home_team(&self) -> &String {
+        &self.home_team
+    }
+
+    pub fn away_team(&self) -> &String {
+        &self.away_team
+    }
+
     pub fn bookmakers(&self) -> &Vec<Bookmaker> {
         &self.bookmakers
     }
