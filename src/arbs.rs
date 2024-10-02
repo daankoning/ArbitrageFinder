@@ -72,15 +72,6 @@ pub fn best_implied_odds(game: odds::Match) -> GameCalculatedResults {
     //     .map(implied_odds);
     let mut best_odds_per_outcome: HashMap<String, TODONAME> = HashMap::new();
 
-    // let include_started_matches = false; // TODO: remove
-    //
-    // let start_time = game.commence_time();
-    // let current_time = &time::SystemTime::now().duration_since(time::UNIX_EPOCH).unwrap().as_secs();
-
-    // if !include_started_matches && start_time < current_time {
-    //     return None;
-    // }
-
     for bookmaker in game.bookmakers() {
         for market in bookmaker.markets() {
             for outcome in market.outcomes() {
@@ -91,7 +82,7 @@ pub fn best_implied_odds(game: odds::Match) -> GameCalculatedResults {
 
                 match best_odds_per_outcome.get(outcome.name()) {
                     Some(stored_odd) => {
-                        if current_odd.implied_odd > stored_odd.implied_odd {
+                        if current_odd.implied_odd < stored_odd.implied_odd {
                             best_odds_per_outcome.insert(
                                 outcome.name().to_owned(),
                                 current_odd,
@@ -130,6 +121,6 @@ pub async fn arbitrage(client: &OddsClient) -> Vec<GameCalculatedResults> {
             Err(_) => vec![].into_iter(),
         })
         .map(best_implied_odds)
-        .filter(|x| 0f64 < x.total_implied_odds() && x.total_implied_odds() < 1.01f64)
+        .filter(|x| 0f64 < x.total_implied_odds() && x.total_implied_odds() < 1f64)
         .collect()
 }

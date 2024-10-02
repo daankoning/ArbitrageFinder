@@ -6,7 +6,10 @@ mod arbs;
 
 #[tokio::main]
 async fn main() {
-    let key = env::var("API_KEY").unwrap();
+    let key = match env::var("API_KEY") {
+        Ok(val) => val,
+        Err(_e) => panic!("Please ensure the API key is set"),
+    };
     let client = client::OddsClient::new(key);
 
     let y = arbs::arbitrage(&client).await;
