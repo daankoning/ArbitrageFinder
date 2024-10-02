@@ -15,7 +15,7 @@ async fn main() {
     let y = arbs::arbitrage(&client).await;
 
     println!("Found {} profitable arbs", y.len());
-    for x in y.iter() {
-        println!("{}", x);
+    for x in &y {
+        println!("{x}");
     }
 }

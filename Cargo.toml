@@ -13,3 +13,11 @@ colored = "2.1.0"
 
 [profile.release]
 panic = "abort"
+
+
+[lints.clippy]
+pedantic = { level = "warn", priority = -1}
+nursery = { level = "warn", priority = -1}
+unwrap_used = "warn"
+expect_used = "warn"
+

@@ -97,10 +97,10 @@ pub async fn get(sport: Sport, client: &OddsClient) -> Result<Vec<Match>, &str> 
 
     match response {
         Ok(response) if response.status().is_success() => {
-            match response.json::<Vec<Match>>().await {
-                Ok(result) => Ok(result),
-                Err(_) => Err("failed to get parse match"),
-            }
+            response.json::<Vec<Match>>().await.map_or(
+                Err("failed to get parse match"),
+                |result| Ok(result),
+            )
         }
         _ => Err("Failed to fetch odds")
     }

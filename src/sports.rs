@@ -9,7 +9,7 @@ pub struct Sport {
 
 impl Sport {
     pub fn key(&self) -> String {
-        self.key.to_owned()
+        self.key.clone()
     }
 }
 
