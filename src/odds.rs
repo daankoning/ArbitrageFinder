@@ -6,16 +6,21 @@ type UnixTime = u64;
 
 #[derive(Debug, Deserialize)]
 pub struct Outcome {
+    /// The name of the outcome. Usually the name of the victor or
+    /// 'Draw' in the case of h2h markets, analogous for other markets.
     name: String,
+    /// The price at which this outcome is being offered in decimal format.
     price: f64,
 }
 
 impl Outcome {
+    /// Getter for `name` field.
     pub fn name(&self) -> &String {
         &self.name
     }
-    pub fn price(&self) -> f64 {
-        self.price
+    /// Getter for `price` field.
+    pub fn price(&self) -> &f64 {
+        &self.price
     }
 }
 
@@ -94,7 +99,7 @@ pub async fn get(sport: Sport, client: &OddsClient) -> Result<Vec<Match>, &str> 
         ])
         .send()
         .await;
-
+    // FIXME: this sometimes randomly returns American format odds (?)
     match response {
         Ok(response) if response.status().is_success() => {
             response.json::<Vec<Match>>().await.map_or(

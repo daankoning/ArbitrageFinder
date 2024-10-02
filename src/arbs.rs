@@ -4,43 +4,57 @@ use std::collections::HashMap;
 use std::fmt::Display;
 use futures::future::join_all;
 use colored::Colorize;
+use ordered_float::OrderedFloat;
 
-// struct TODONAME {
-//     bookmaker: odds::Bookmaker,
-//
-// }
 
-// fn implied_odds(bookmaker: odds::Bookmaker) -> Result<f64, String> {
-//     let binding = bookmaker.markets();
-//     let market = match binding.first() {
-//         Some(x) => x,
-//         None => return Err("Bookmaker has empty market".to_string()),
-//     };
-//
-//     let x = market
-//         .outcomes()
-//         .iter()
-//         .map(|outcome| {
-//
-//         });
-//     todo!()
-// }
-
+/// A simple pair of a bookie and the odds they offer.
+///
+/// Used as way of flattening the deeply nested structure [`Match::bookmakers`](odds::Match::bookmakers).
 #[derive(Debug)]
-pub struct TODONAME {
+struct BookieOutcome {
     bookmaker_name: String,
     implied_odd: f64,
 }
 
 #[derive(Debug)]
 pub struct GameCalculatedResults {
+    /// The game to which these results belong.
     game: odds::Match,
-    outcomes: HashMap<String, TODONAME>,
+    /// A mapping from the name of the outcome to the bookie offering
+    /// the best odds for that outcome.
+    /// 
+    /// The outcome naming conventions are inherited from [`Outcome::name`](odds::Outcome::name).
+    outcomes: HashMap<String, BookieOutcome>,
 }
 
 impl GameCalculatedResults {
     fn total_implied_odds(&self) -> f64 {
         self.outcomes.values().map(|y| y.implied_odd).sum::<f64>()
+    }
+}
+
+
+/// Contains one function, [`sorted_by_key`](Self::sorted_by_key) which allows a container
+/// that to be sorted in place.
+///
+/// This is needed to be able to sort the results of [`arbitrage`]
+/// whilst maintaining a functional change instead of needing to
+/// resort to mutability.
+
+// TODO: In the future, this may expand to include the more conventional sorting functions, as well as being `#[derive]`able.
+trait SortableInPlace<T> {
+    fn sorted_by_key<U>(self, f: fn(&T) -> U) -> Self
+    where
+        U: Ord;
+}
+
+impl<T> SortableInPlace<T> for Vec<T> {
+    fn sorted_by_key<U>(mut self, f: fn(&T) -> U) -> Self
+    where
+        U: Ord,
+    {
+        self.sort_by_key(f);
+        self
     }
 }
 
@@ -66,16 +80,17 @@ impl Display for GameCalculatedResults {
     }
 }
 
-pub fn best_implied_odds(game: odds::Match) -> GameCalculatedResults {
+/// Calculates the best odds for each outcome in a given match.
+fn best_implied_odds(game: odds::Match) -> GameCalculatedResults {
     // let x = game.bookmakers()
     //     .into_iter()
     //     .map(implied_odds);
-    let mut best_odds_per_outcome: HashMap<String, TODONAME> = HashMap::new();
+    let mut best_odds_per_outcome: HashMap<String, BookieOutcome> = HashMap::new();
 
     for bookmaker in game.bookmakers() {
         for market in bookmaker.markets() {
             for outcome in market.outcomes() {
-                let current_odd = TODONAME {
+                let current_odd = BookieOutcome {
                     bookmaker_name: bookmaker.key().to_owned(),
                     implied_odd: 1f64 / outcome.price(),
                 };
@@ -103,6 +118,11 @@ pub fn best_implied_odds(game: odds::Match) -> GameCalculatedResults {
     GameCalculatedResults { game, outcomes: best_odds_per_outcome }
 }
 
+
+/// Gives a Vec of profitable arbitrage opportunities, sorted by
+/// profit margin.
+
+// TODO: take bunch of extra arguments such as region and cuttofs
 pub async fn arbitrage(client: &OddsClient) -> Vec<GameCalculatedResults> {
     join_all(
         sports::get(&client)
@@ -117,5 +137,6 @@ pub async fn arbitrage(client: &OddsClient) -> Vec<GameCalculatedResults> {
         )
         .map(best_implied_odds)
         .filter(|x| 0f64 < x.total_implied_odds() && x.total_implied_odds() < 1f64)
-        .collect()
+        .collect::<Vec<_>>()
+        .sorted_by_key(|x| OrderedFloat(x.total_implied_odds()))
 }
