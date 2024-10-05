@@ -17,7 +17,6 @@ use futures::future::join_all;
 use colored::Colorize;
 use ordered_float::OrderedFloat;
 
-
 /// A simple pair of a bookie and the odds they offer.
 ///
 /// Used as way of flattening the deeply nested structure [`Match::bookmakers`](odds::Match::bookmakers).
@@ -140,22 +139,29 @@ fn best_implied_odds(game: odds::Match) -> GameCalculatedResults {
 
 /// Gives a Vec of profitable arbitrage opportunities, sorted by
 /// profit margin.
+/// 
+/// The bookies are taking to be in `region`.
+/// 
+/// The argument `cutoff` refers to the minimum profit margin required
+/// for the arb to be accepted. For example, a cutoff of `0f64` means
+/// accepting all profitable arbs and `0.1f64` means a minimum 10%
+/// profit ratio.
 
-// TODO: take bunch of extra arguments such as region and cuttofs
-pub async fn arbitrage(client: &OddsClient) -> Vec<GameCalculatedResults> {
+// TODO: give useful error messages
+pub async fn arbitrage(client: &OddsClient, region: odds::Region, cutoff: f64) -> Vec<GameCalculatedResults> {
     join_all(
         sports::get(&client)
             .await
             .unwrap()
             .into_iter()
-            .map(|sp| async { odds::get(sp, client).await }))
+            .map(|sp| async { odds::get(sp, client, region).await }))
         .await
         .into_iter()
         .flat_map(
             |sport| sport.map_or_else(|_| vec![].into_iter(), IntoIterator::into_iter),
         )
         .map(best_implied_odds)
-        .filter(|x| 0f64 < x.total_implied_odds() && x.total_implied_odds() < 1f64)
+        .filter(|x| 0f64 < x.total_implied_odds() && x.total_implied_odds() < 1f64 - cutoff)
         .collect::<Vec<_>>()
         .sorted_by_key(|x| OrderedFloat(x.total_implied_odds()))
 }

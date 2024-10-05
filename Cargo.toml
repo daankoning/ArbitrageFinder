@@ -1,5 +1,7 @@
 [package]
 name = "arbitrage_finder"
+description = "A simple tool to find sports betting arbitrage opportunities"
+authors = ["Daan Koning"]
 version = "0.1.0"
 edition = "2021"
 readme = "README.md"

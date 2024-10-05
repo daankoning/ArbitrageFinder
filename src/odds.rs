@@ -1,5 +1,6 @@
 // TODO: document this entire thing
 use serde::Deserialize;
+use std::fmt::Display;
 use crate::client::{OddsClient, Endpoint};
 use crate::sports::Sport;
 
@@ -87,14 +88,39 @@ impl Match {
     }
 }
 
-pub async fn get(sport: Sport, client: &OddsClient) -> Result<Vec<Match>, &str> {
+/// The region in which we are looking for bookmakers.
+/// 
+/// See the [API docs](https://the-odds-api.com/sports-odds-data/bookmaker-apis.html)
+/// for what bookmakers are included in what region.
+#[derive(Copy, Clone)]
+pub enum Region {
+    US,
+    US2,
+    UK,
+    AU,
+    EU,
+}
+
+impl Display for Region {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", match self { 
+            Self::US =>  "us",
+            Self::US2 => "us2",
+            Self::UK =>  "uk",
+            Self::AU =>  "au",
+            Self::EU =>  "eu",
+        })
+    }
+}
+
+pub async fn get(sport: Sport, client: &OddsClient, region: Region) -> Result<Vec<Match>, &str> {
     let sport_key = sport.key();
 
     let response = client
         .get(&Endpoint::Odds(sport))
         .query(&[
             ("sport", sport_key),
-            ("regions", "eu".to_string()), // TODO: argumentify
+            ("regions", region.to_string()),
             ("oddsformat", "decimal".to_string()),
             ("dateFormat", "unix".to_string()),
         ])
