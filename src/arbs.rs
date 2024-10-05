@@ -1,3 +1,14 @@
+//! THis module is for generating arbitrage opportunities.
+//! 
+//! Externally, you should only need to call [`arbitrage`]:
+//! ```
+//! // Create a client (only necessary for the example, you should already have one)
+//! let client = Client::new("example_key".to_string());
+//! 
+//! // Fetch the opportunities:
+//! let arbitrage_opportunities = arbs::arbitrage(&client).await;
+//! println!("{arbitrage_opportunities}"); // (Display is implemented)
+//! ```
 use crate::{odds, sports};
 use crate::client::OddsClient;
 use std::collections::HashMap;
@@ -16,45 +27,28 @@ struct BookieOutcome {
     implied_odd: f64,
 }
 
+/// Structures a game together with the best odds for each outcome.
+///
+/// Used to structure the outputs of [`best_implied_odds`] and [`arbitrage`].
 #[derive(Debug)]
 pub struct GameCalculatedResults {
     /// The game to which these results belong.
     game: odds::Match,
     /// A mapping from the name of the outcome to the bookie offering
     /// the best odds for that outcome.
-    /// 
+    ///
     /// The outcome naming conventions are inherited from [`Outcome::name`](odds::Outcome::name).
     outcomes: HashMap<String, BookieOutcome>,
 }
 
 impl GameCalculatedResults {
+    /// Returns the total implied odds of the game.
+    /// 
+    /// This is the sum of the inverses of the best odds for each outcome.
+    /// See the crate documentation for a more extensive explanation on
+    /// what this means.
     fn total_implied_odds(&self) -> f64 {
-        self.outcomes.values().map(|y| y.implied_odd).sum::<f64>()
-    }
-}
-
-
-/// Contains one function, [`sorted_by_key`](Self::sorted_by_key) which allows a container
-/// that to be sorted in place.
-///
-/// This is needed to be able to sort the results of [`arbitrage`]
-/// whilst maintaining a functional change instead of needing to
-/// resort to mutability.
-
-// TODO: In the future, this may expand to include the more conventional sorting functions, as well as being `#[derive]`able.
-trait SortableInPlace<T> {
-    fn sorted_by_key<U>(self, f: fn(&T) -> U) -> Self
-    where
-        U: Ord;
-}
-
-impl<T> SortableInPlace<T> for Vec<T> {
-    fn sorted_by_key<U>(mut self, f: fn(&T) -> U) -> Self
-    where
-        U: Ord,
-    {
-        self.sort_by_key(f);
-        self
+        self.outcomes.values().map(|y| y.implied_odd).sum()
     }
 }
 
@@ -77,6 +71,31 @@ impl Display for GameCalculatedResults {
             )?;
         }
         write!(f, "")
+    }
+}
+
+
+/// Contains one function, [`sorted_by_key`](Self::sorted_by_key) which allows a container
+/// to be sorted and return itself. The container should contain items of type `T`.
+///
+/// This is needed to be able to sort the results of [`arbitrage`]
+/// whilst maintaining a functional change instead of needing to
+/// resort to mutability.
+
+// TODO: In the future, this may expand to include the more conventional sorting functions, as well as being `#[derive]`able.
+trait Sorted<T> {
+    fn sorted_by_key<U>(self, f: fn(&T) -> U) -> Self
+    where
+        U: Ord;
+}
+
+impl<T> Sorted<T> for Vec<T> {
+    fn sorted_by_key<U>(mut self, f: fn(&T) -> U) -> Self
+    where
+        U: Ord,
+    {
+        self.sort_by_key(f);
+        self
     }
 }
 

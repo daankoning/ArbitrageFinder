@@ -1,3 +1,4 @@
+// TODO: document this entire thing
 use serde::Deserialize;
 use crate::client::{OddsClient, Endpoint};
 use crate::sports::Sport;

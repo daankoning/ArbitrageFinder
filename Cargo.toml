@@ -2,6 +2,12 @@
 name = "arbitrage_finder"
 version = "0.1.0"
 edition = "2021"
+readme = "README.md"
+homepage = "https://github.com/daankoning/ArbitrageFinder/"
+repository = "https://github.com/daankoning/ArbitrageFinder/"
+license-file = "LICENSE"
+keywords = ["sports", "betting", "gambling", "arbitrage"]
+categories = ["command-line-utilities", "finance"]
 
 [dependencies]
 reqwest = { version = "0.12.7", features = ["json"] }
@@ -14,7 +20,6 @@ ordered-float = "4.3.0"
 
 [profile.release]
 panic = "abort"
-
 
 [lints.clippy]
 pedantic = { level = "warn", priority = -1}
