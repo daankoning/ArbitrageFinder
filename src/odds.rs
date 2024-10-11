@@ -121,7 +121,7 @@ pub async fn get(sport: Sport, client: &OddsClient, region: Region) -> Result<Ve
         .query(&[
             ("sport", sport_key),
             ("regions", region.to_string()),
-            ("oddsformat", "decimal".to_string()),
+            ("oddsFormat", "decimal".to_string()),
             ("dateFormat", "unix".to_string()),
         ])
         .send()

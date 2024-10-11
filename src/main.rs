@@ -21,6 +21,7 @@ async fn main() {
         &client,
         odds::Region::EU,
         0.1f64,
+        false,
     ).await;
     
     println!("Found {} profitable arbs", y.len());

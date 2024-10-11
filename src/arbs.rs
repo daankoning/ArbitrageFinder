@@ -148,7 +148,7 @@ fn best_implied_odds(game: odds::Match) -> GameCalculatedResults {
 /// profit ratio.
 
 // TODO: give useful error messages
-pub async fn arbitrage(client: &OddsClient, region: odds::Region, cutoff: f64) -> Vec<GameCalculatedResults> {
+pub async fn arbitrage(client: &OddsClient, region: odds::Region, cutoff: f64, exclude_already_started: bool) -> Vec<GameCalculatedResults> {
     join_all(
         sports::get(&client)
             .await
@@ -160,6 +160,7 @@ pub async fn arbitrage(client: &OddsClient, region: odds::Region, cutoff: f64) -
         .flat_map(
             |sport| sport.map_or_else(|_| vec![].into_iter(), IntoIterator::into_iter),
         )
+        .filter(|sport| true || todo!("check current time and stuff"))
         .map(best_implied_odds)
         .filter(|x| 0f64 < x.total_implied_odds() && x.total_implied_odds() < 1f64 - cutoff)
         .collect::<Vec<_>>()
