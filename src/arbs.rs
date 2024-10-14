@@ -16,6 +16,7 @@ use std::fmt::Display;
 use futures::future::join_all;
 use colored::Colorize;
 use ordered_float::OrderedFloat;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 /// A simple pair of a bookie and the odds they offer.
 ///
@@ -149,6 +150,11 @@ fn best_implied_odds(game: odds::Match) -> GameCalculatedResults {
 
 // TODO: give useful error messages
 pub async fn arbitrage(client: &OddsClient, region: odds::Region, cutoff: f64, exclude_already_started: bool) -> Vec<GameCalculatedResults> {
+    let now = &SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .expect("Time went backwards")
+        .as_secs();
+    
     join_all(
         sports::get(&client)
             .await
@@ -160,7 +166,7 @@ pub async fn arbitrage(client: &OddsClient, region: odds::Region, cutoff: f64, e
         .flat_map(
             |sport| sport.map_or_else(|_| vec![].into_iter(), IntoIterator::into_iter),
         )
-        .filter(|sport| true || todo!("check current time and stuff"))
+        .filter(|sport| !exclude_already_started || sport.commence_time() > now)
         .map(best_implied_odds)
         .filter(|x| 0f64 < x.total_implied_odds() && x.total_implied_odds() < 1f64 - cutoff)
         .collect::<Vec<_>>()
