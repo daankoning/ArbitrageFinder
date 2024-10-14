@@ -87,7 +87,16 @@ impl Match {
     }
 }
 
-pub async fn get(sport: Sport, client: &OddsClient) -> Result<Vec<Match>, &str> {
+/// The issues we can encounter when fetching the odds list.
+#[derive(Debug)]
+pub enum OddsError {
+    /// Failed to get any data from the API.
+    APIConnectionFailure,
+    /// Failed to parse the data received from the API into odds.
+    ParsingFailure,
+}
+
+pub async fn get(sport: Sport, client: &OddsClient) -> Result<Vec<Match>, OddsError> {
     let sport_key = sport.key();
 
     let response = client
@@ -103,11 +112,8 @@ pub async fn get(sport: Sport, client: &OddsClient) -> Result<Vec<Match>, &str> 
     // FIXME: this sometimes randomly returns American format odds (?)
     match response {
         Ok(response) if response.status().is_success() => {
-            response.json::<Vec<Match>>().await.map_or(
-                Err("failed to get parse match"),
-                |result| Ok(result),
-            )
+            response.json::<Vec<Match>>().await.map_err(|_| OddsError::ParsingFailure)
         }
-        _ => Err("Failed to fetch odds")
+        _ => Err(OddsError::APIConnectionFailure),
     }
 }

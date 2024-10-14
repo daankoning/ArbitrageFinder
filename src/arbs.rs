@@ -1,4 +1,4 @@
-//! THis module is for generating arbitrage opportunities.
+//! This module is for generating arbitrage opportunities.
 //! 
 //! Externally, you should only need to call [`arbitrage`]:
 //! ```
@@ -43,7 +43,7 @@ pub struct GameCalculatedResults {
 
 impl GameCalculatedResults {
     /// Returns the total implied odds of the game.
-    /// 
+    ///
     /// This is the sum of the inverses of the best odds for each outcome.
     /// See the crate documentation for a more extensive explanation on
     /// what this means.
@@ -144,9 +144,9 @@ fn best_implied_odds(game: odds::Match) -> GameCalculatedResults {
 // TODO: take bunch of extra arguments such as region and cuttofs
 pub async fn arbitrage(client: &OddsClient) -> Vec<GameCalculatedResults> {
     join_all(
-        sports::get(&client)
+        sports::get(client)
             .await
-            .unwrap()
+            .unwrap_or(vec![]) // TODO: This could give a useful user error
             .into_iter()
             .map(|sp| async { odds::get(sp, client).await }))
         .await

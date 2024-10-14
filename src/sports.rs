@@ -9,7 +9,16 @@
 //! ```
 use serde::Deserialize;
 use crate::client::{OddsClient, Endpoint};
+use crate::sports::SportsError::APIConnectionFailure;
 
+/// The issues we can encounter when fetching the sports list.
+#[derive(Debug)]
+pub enum SportsError {
+    /// Failed to get any data from the API.
+    APIConnectionFailure,
+    /// Failed to parse the data received from the API into sports.
+    ParsingFailure,
+}
 
 /// A single sport recognized by the API.
 /// 
@@ -47,7 +56,7 @@ impl Sport {
 /// Especially the last one is fairly common. The API often knows 
 /// about bookmakers operating in the US but not in Europe for college
 /// games (and vice versa for the more obscure EU football leagues). 
-pub async fn get(client: &OddsClient) -> Result<Vec<Sport>, &str> {
+pub async fn get(client: &OddsClient) -> Result<Vec<Sport>, SportsError> {
     let response = client
         .get(&Endpoint::Sports)
         .send()
@@ -55,8 +64,8 @@ pub async fn get(client: &OddsClient) -> Result<Vec<Sport>, &str> {
 
     match response {
         Ok(response) if response.status().is_success() => {
-            Ok(response.json().await.unwrap())
+            response.json().await.map_err(|_| SportsError::ParsingFailure)
         }
-        _ => Err("Failed to fetch sports")
+        _ => Err(APIConnectionFailure)
     }
 }

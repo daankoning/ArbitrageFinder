@@ -1,7 +1,6 @@
 //! Various utility tools to enable interacting with the API.
 use crate::sports::Sport;
 use reqwest::{Client, RequestBuilder};
-use crate::sports;
 
 /// The URL where the API lives.
 ///
