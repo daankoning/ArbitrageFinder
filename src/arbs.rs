@@ -16,7 +16,7 @@ use std::fmt::Display;
 use futures::future::join_all;
 use colored::Colorize;
 use ordered_float::OrderedFloat;
-
+use std::time;
 
 /// A simple pair of a bookie and the odds they offer.
 ///
@@ -137,25 +137,42 @@ fn best_implied_odds(game: odds::Match) -> GameCalculatedResults {
     GameCalculatedResults { game, outcomes: best_odds_per_outcome }
 }
 
+/// Determines if a time is yet to happen.
+fn is_in_future(time: &odds::UnixTime) -> bool {
+    let now = &time::SystemTime::now()
+        .duration_since(time::UNIX_EPOCH)
+        .expect("Time went backwards")
+        .as_secs();
+    
+    time > now
+}
 
 /// Gives a Vec of profitable arbitrage opportunities, sorted by
 /// profit margin.
+/// 
+/// The bookies are taking to be in `region`.
+/// 
+/// The argument `cutoff` refers to the minimum profit margin required
+/// for the arb to be accepted. For example, a cutoff of `0f64` means
+/// accepting all profitable arbs and `0.1f64` means a minimum 10%
+/// profit ratio.
 
-// TODO: take bunch of extra arguments such as region and cuttofs
-pub async fn arbitrage(client: &OddsClient) -> Vec<GameCalculatedResults> {
+// TODO: give useful error messages
+pub async fn arbitrage(client: &OddsClient, region: odds::Region, cutoff: f64, exclude_already_started: bool) -> Vec<GameCalculatedResults> {
     join_all(
         sports::get(client)
             .await
             .unwrap_or(vec![]) // TODO: This could give a useful user error
             .into_iter()
-            .map(|sp| async { odds::get(sp, client).await }))
+            .map(|sp| async { odds::get(sp, client, region).await }))
         .await
         .into_iter()
         .flat_map(
             |sport| sport.map_or_else(|_| vec![].into_iter(), IntoIterator::into_iter),
         )
+        .filter(|sport| !exclude_already_started || !is_in_future(sport.commence_time())) // FIXME: extract into function has_started
         .map(best_implied_odds)
-        .filter(|x| 0f64 < x.total_implied_odds() && x.total_implied_odds() < 1f64)
+        .filter(|x| 0f64 < x.total_implied_odds() && x.total_implied_odds() < 1f64 - cutoff)
         .collect::<Vec<_>>()
         .sorted_by_key(|x| OrderedFloat(x.total_implied_odds()))
 }

@@ -1,6 +1,8 @@
 //! **Note:** This documentation is intended for development use.
 //! If you only want to use the script, check out `README.md`
 //! or the [repository](https://github.com/daankoning/ArbitrageFinder/).
+
+// TODO: explain math here
 use std::env;
 mod client;
 mod sports;
@@ -15,7 +17,12 @@ async fn main() {
     };
     let client = client::OddsClient::new(key);
     
-    let y = arbs::arbitrage(&client).await;
+    let y = arbs::arbitrage(
+        &client,
+        odds::Region::EU,
+        0.1f64,
+        true,
+    ).await;
     
     println!("Found {} profitable arbs", y.len());
     for x in &y {
