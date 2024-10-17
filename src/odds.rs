@@ -4,7 +4,7 @@ use std::fmt::Display;
 use crate::client::{OddsClient, Endpoint};
 use crate::sports::Sport;
 
-type UnixTime = u64;
+pub type UnixTime = u64;
 
 #[derive(Debug, Deserialize)]
 pub struct Outcome {
