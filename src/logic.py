@@ -39,7 +39,7 @@ def get_sports(key: str) -> set[str]:
     escaped_url = PROTOCOL + requests.utils.quote(url)
     querystring = {"apiKey": key}
 
-    response = requests.get(escaped_url, params=querystring)
+    response = requests.get(escaped_url, params=querystring, timeout=30)
     if not response:
         handle_faulty_response(response)
 
@@ -56,7 +56,7 @@ def get_data(key: str, sport: str, region: str = "eu"):
         "dateFormat": "unix"
     }
 
-    response = requests.get(escaped_url, params=querystring)
+    response = requests.get(escaped_url, params=querystring, timeout=30)
     if not response:
         handle_faulty_response(response)
 
