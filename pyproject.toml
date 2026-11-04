@@ -1,0 +1,19 @@
+[project]
+name = "arbitrage-finder"
+version = "1.0.0"
+description = "A simple tool to find sports betting arbitrage opportunities."
+readme = "README.md"
+license = "GPL-2.0-only"
+authors = [{ name = "Daan Koning", email = "daanolivierkoning@gmail.com" }]
+requires-python = ">=3.10"
+dependencies = [
+    "python-dotenv>=0.21.0",
+    "requests>=2.31.0",
+    "rich>=12.6.0",
+]
+
+[project.optional-dependencies]
+progress = ["tqdm>=4.0"]
+
+[project.urls]
+Repository = "https://github.com/daankoning/ArbitrageFinder"
