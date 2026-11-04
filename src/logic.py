@@ -26,8 +26,7 @@ class RateLimitException(APIException):
 
 
 class TimeoutException(APIException):
-    def __str__(self):
-        return self.args[0]
+    pass
 
 
 def handle_faulty_response(response: requests.Response):
