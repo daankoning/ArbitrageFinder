@@ -8,13 +8,17 @@ Start out by cloning the repository:
 
     git clone https://github.com/daankoning/ArbitrageFinder.git
 
-Install the dependencies:
+The project is managed with [uv](https://docs.astral.sh/uv/). Install the dependencies:
 
-    pip install -r requirements.txt
+    uv sync
+
+To also show a progress bar while matches are checked, install the optional `progress` extra (which pulls in [tqdm](https://github.com/tqdm/tqdm)):
+
+    uv sync --extra progress
 
 Next, ensure you have an API key from The Odds API and simply run:
 
-    python main.py --key <YOUR_API_KEY>
+    uv run main.py --key <YOUR_API_KEY>
 
 ## Usage
 The tool offers five optional command line arguments.
