@@ -5,7 +5,7 @@ description = "A simple tool to find sports betting arbitrage opportunities."
 readme = "README.md"
 license = "GPL-2.0-only"
 authors = [{ name = "Daan Koning", email = "daanolivierkoning@gmail.com" }]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
     "python-dotenv>=0.21.0",
     "requests>=2.31.0",
