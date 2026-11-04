@@ -25,6 +25,10 @@ class RateLimitException(APIException):
     pass
 
 
+class TimeoutException(APIException):
+    pass
+
+
 def handle_faulty_response(response: requests.Response):
     if response.status_code == 401:
         raise AuthenticationException("Failed to authenticate with the API. is the API key valid?", response)
@@ -39,7 +43,10 @@ def get_sports(key: str) -> set[str]:
     escaped_url = PROTOCOL + requests.utils.quote(url)
     querystring = {"apiKey": key}
 
-    response = requests.get(escaped_url, params=querystring)
+    try:
+        response = requests.get(escaped_url, params=querystring, timeout=30)
+    except requests.exceptions.Timeout:
+        raise TimeoutException("Timed out while trying to access the API.")
     if not response:
         handle_faulty_response(response)
 
@@ -56,7 +63,10 @@ def get_data(key: str, sport: str, region: str = "eu"):
         "dateFormat": "unix"
     }
 
-    response = requests.get(escaped_url, params=querystring)
+    try:
+        response = requests.get(escaped_url, params=querystring, timeout=30)
+    except requests.exceptions.Timeout:
+        raise TimeoutException("Timed out while trying to access the API.")
     if not response:
         handle_faulty_response(response)
 
