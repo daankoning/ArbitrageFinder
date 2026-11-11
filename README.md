@@ -21,7 +21,7 @@ Next, ensure you have an API key from The Odds API and simply run:
     uv run main.py --key <YOUR_API_KEY>
 
 ## Usage
-The tool offers five optional command line arguments.
+The tool offers the following optional command line arguments.
 
 ### API key
 In order to set the API key to use either the `-k` or `--key` arguments. If neither of these are used the script will read the value of `$API_KEY`. `.env` files are also supported and automatically loaded.
@@ -37,3 +37,23 @@ The `-c` or `--cutoff` allow you to set a minimum profit margin. Should be set a
 
 ### Help
 The `-h` or `--help` flags will show a short help message with documentation.
+
+### Settlement analysis
+
+`--budget 100 --commission 2` allocates 100 currency units across named outcomes,
+with an illustrative 2% commission on winning profit. Each outcome reports its stake
+and net settlement. Equal-priced outcomes remain separate. Whole cents are allocated
+by largest remainder, preserving the available budget; this is not an optimal integer
+stake solver. The worst settlement can be negative after rounding or commission even
+when the quoted odds pass the theoretical cutoff.
+
+Only complete head-to-head markets with finite decimal odds greater than one are
+compared. Soccer markets must include a draw, and started matches are excluded by
+default. The cutoff uses the theoretical return `1 / sum(1 / odds) - 1` before costs.
+`--unformatted` emits valid JSON including the settlement analysis.
+
+These calculations assume exhaustive, mutually exclusive outcomes and matching
+bookmaker settlement rules. Limits, taxes, voids, minimum stakes and execution delays
+are not modeled. No wagers are placed.
+
+Run the offline regression tests with `uv run python -m unittest discover -s tests -v`.
